@@ -1,0 +1,117 @@
+diff --git a/X1nput.sln b/X1nput.sln
+index caea9a4..f20137e 100644
+--- a/X1nput.sln
++++ b/X1nput.sln
+@@ -1,7 +1,7 @@
+ ﻿
+ Microsoft Visual Studio Solution File, Format Version 12.00
+-# Visual Studio 15
+-VisualStudioVersion = 15.0.28307.168
++# Visual Studio Version 16
++VisualStudioVersion = 16.0.29613.14
+ MinimumVisualStudioVersion = 10.0.40219.1
+ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XInput1_3", "X1nput\XInput.vcxproj", "{C565022D-170F-427F-B2D9-D591D15562EA}"
+ EndProject
+diff --git a/X1nput/XInput.vcxproj b/X1nput/XInput.vcxproj
+index 10d6274..5d58337 100644
+--- a/X1nput/XInput.vcxproj
++++ b/X1nput/XInput.vcxproj
+@@ -23,33 +23,33 @@
+     <ProjectGuid>{C565022D-170F-427F-B2D9-D591D15562EA}</ProjectGuid>
+     <Keyword>Win32Proj</Keyword>
+     <RootNamespace>XInput</RootNamespace>
+-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+     <ProjectName>XInput1_3</ProjectName>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>true</UseDebugLibraries>
+-    <PlatformToolset>v141</PlatformToolset>
++    <PlatformToolset>v142</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+-    <PlatformToolset>v141</PlatformToolset>
++    <PlatformToolset>v142</PlatformToolset>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>true</UseDebugLibraries>
+-    <PlatformToolset>v141</PlatformToolset>
++    <PlatformToolset>v142</PlatformToolset>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <UseDebugLibraries>false</UseDebugLibraries>
+-    <PlatformToolset>v141</PlatformToolset>
++    <PlatformToolset>v142</PlatformToolset>
+     <WholeProgramOptimization>true</WholeProgramOptimization>
+     <CharacterSet>Unicode</CharacterSet>
+   </PropertyGroup>
+diff --git a/X1nput/dllmain.cpp b/X1nput/dllmain.cpp
+index 46d7044..5a1eec7 100644
+--- a/X1nput/dllmain.cpp
++++ b/X1nput/dllmain.cpp
+@@ -424,26 +424,45 @@ DLLEXPORT DWORD WINAPI XInputGetState(_In_ DWORD dwUserIndex, _Out_ XINPUT_STATE
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_Y) != 0) keys += XINPUT_GAMEPAD_Y;
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_B) != 0) keys += XINPUT_GAMEPAD_B;
+ 
++		//if ((state.Buttons & GamepadButtons::GamepadButtons_DPadUp) != 0) keys += XINPUT_GAMEPAD_RIGHT_THUMB;
++		//if ((state.Buttons & GamepadButtons::GamepadButtons_DPadLeft) != 0) keys += XINPUT_GAMEPAD_LEFT_THUMB;
++
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_RightThumbstick) != 0) keys += XINPUT_GAMEPAD_RIGHT_THUMB;
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_LeftThumbstick) != 0) keys += XINPUT_GAMEPAD_LEFT_THUMB;
++
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_RightShoulder) != 0) keys += XINPUT_GAMEPAD_RIGHT_SHOULDER;
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_LeftShoulder) != 0) keys += XINPUT_GAMEPAD_LEFT_SHOULDER;
+ 
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_View) != 0) keys += XINPUT_GAMEPAD_BACK;
+ 		if ((state.Buttons & GamepadButtons::GamepadButtons_Menu) != 0) keys += XINPUT_GAMEPAD_START;
+ 
+-		if ((state.Buttons & GamepadButtons::GamepadButtons_DPadUp) != 0) keys += XINPUT_GAMEPAD_DPAD_UP;
+-		if ((state.Buttons & GamepadButtons::GamepadButtons_DPadDown) != 0) keys += XINPUT_GAMEPAD_DPAD_DOWN;
+-		if ((state.Buttons & GamepadButtons::GamepadButtons_DPadLeft) != 0) keys += XINPUT_GAMEPAD_DPAD_LEFT;
+-		if ((state.Buttons & GamepadButtons::GamepadButtons_DPadRight) != 0) keys += XINPUT_GAMEPAD_DPAD_RIGHT;
++		boolean up_pressed = (state.Buttons & GamepadButtons::GamepadButtons_DPadUp) != 0;
++		//boolean up_pressed = (state.Buttons & GamepadButtons::GamepadButtons_RightThumbstick) != 0;
++		boolean down_pressed = (state.Buttons & GamepadButtons::GamepadButtons_DPadDown) != 0;
++		boolean left_pressed = (state.Buttons & GamepadButtons::GamepadButtons_DPadLeft) != 0;
++		//boolean left_pressed = (state.Buttons & GamepadButtons::GamepadButtons_LeftThumbstick) != 0;
++		boolean right_pressed = (state.Buttons & GamepadButtons::GamepadButtons_DPadRight) != 0;
+ 
+-		// Press both shoulder buttons and the start button to reload configuration.
+-		if ((state.Buttons & GamepadButtons::GamepadButtons_RightShoulder) != 0 &&
+-			(state.Buttons & GamepadButtons::GamepadButtons_LeftShoulder) != 0 &&
+-			(state.Buttons & GamepadButtons::GamepadButtons_Menu) != 0) {
+-			GetConfig();
+-		}
++		if (up_pressed) keys += XINPUT_GAMEPAD_DPAD_UP;
++		if (down_pressed) keys += XINPUT_GAMEPAD_DPAD_DOWN;
++		if (left_pressed) keys += XINPUT_GAMEPAD_DPAD_LEFT;
++		if (right_pressed) keys += XINPUT_GAMEPAD_DPAD_RIGHT;
+ 
++		// Press both shoulder buttons and the start button to reload configuration.
++		//if ((state.Buttons & GamepadButtons::GamepadButtons_RightShoulder) != 0 &&
++	//		(state.Buttons & GamepadButtons::GamepadButtons_LeftShoulder) != 0 &&
++	//		(state.Buttons & GamepadButtons::GamepadButtons_Menu) != 0) {
++	//		GetConfig();
++	//	}
++
++		if (left_pressed && right_pressed) {
++			keys &= ~XINPUT_GAMEPAD_DPAD_LEFT;
++			keys &= ~XINPUT_GAMEPAD_DPAD_RIGHT;
++		};
++
++		if (up_pressed && down_pressed) {
++			keys &= ~XINPUT_GAMEPAD_DPAD_DOWN;
++		};
+ 
+ 		pState->dwPacketNumber = state.Timestamp;
+ 		pState->Gamepad.wButtons = keys;
